@@ -1,22 +1,38 @@
-Role Name
-=========
+ansible-role-sshd-host-keys
+===========================
 
-A brief description of the role goes here.
+A simple role that just copies sshd host keys, certs and
+ssh_known_hosts from a specified location.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+It's expected that you use another role such as
+https://github.com/CSC-IT-Center-for-Science/ansible-role-sshd-host-keys
+to generate the keys, and yet another role such as
+https://github.com/willshersystems/ansible-sshd to actually configure
+sshd.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+ssh_host_keys_dir specifies the root of the directory where the keys
+are located. The keys are then in the subdirectory "{{
+inventory_hostname }}/ssh".
+
+The ssh_host_key_files variable specifies a list of private key names
+to copy. The name of the corresponding public key and certificate is
+automatically generated from that name.
+
+    ssh_host_keys_dir: Directory where to copy the host keys from.
+	ssh_host_key_files:
+	 - ssh_host_ed25519_key
+	   
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+None.
 
 Example Playbook
 ----------------
@@ -25,14 +41,15 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: servers
       roles:
-         - { role: username.rolename, x: 42 }
+         - { role: ansible-role-sshd-host-keys-client  }
 
 License
 -------
 
-BSD
+GPLv3
 
 Author Information
 ------------------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+https://github.com/jabl
+

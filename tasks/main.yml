@@ -1,2 +1,25 @@
 ---
 # tasks file for ansible-role-sshd-host-keys-client
+
+- name: Copy ssh host key
+  copy: src={{ ssh_host_keys_dir }}/{{ inventory_hostname_short }}/ssh/{{ item }} dest=/etc/ssh/{{ item }} mode=0600 owner=root group=root
+  with_items:
+    - "{{ ssh_host_key_files }}"
+  notify: restart sshd
+
+- name: Copy ssh host public key
+  copy: src={{ ssh_host_keys_dir }}/{{ inventory_hostname_short }}/ssh/{{ item }}.pub dest=/etc/ssh/{{ item }}.pub mode=0644 owner=root group=root
+  with_items:
+    - "{{ ssh_host_key_files }}"
+  notify: restart sshd
+
+- name: Copy ssh host certificate
+  copy: src={{ ssh_host_keys_dir }}/{{ inventory_hostname_short }}/ssh/{{ item }}-cert.pub dest=/etc/ssh/{{ item }}-cert.pub mode=0644 owner=root group=root
+  with_items:
+    - "{{ ssh_host_key_files }}"
+  ignore_errors: True
+  notify: restart sshd
+
+- name: Copy ssh_known_hosts
+  copy: src={{ ssh_host_keys_dir }}/ssh_known_hosts dest=/etc/ssh/ssh_known_hosts mode=0644 owner=root group=root
+  notify: restart sshd
