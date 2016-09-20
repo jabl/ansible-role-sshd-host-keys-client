@@ -1,25 +1,29 @@
 ---
 # tasks file for ansible-role-sshd-host-keys-client
 
-- name: Copy ssh host key
-  copy: src={{ ssh_host_keys_dir }}/{{ inventory_hostname_short }}/ssh/{{ item }} dest=/etc/ssh/{{ item }} mode=0600 owner=root group=root
-  with_items:
-    - "{{ ssh_host_key_files }}"
+- name: Generate the ssh host certificate
+  command: "/usr/bin/curl -o /etc/ssh/{{ ssh_host_key_cert }} -F file=@/etc/ssh/{{ ssh_host_key_pub }} {{ ssh_hostca_url }}" 
+  args:
+    creates: "/etc/ssh/{{ ssh_host_key_cert }}"
   notify: restart sshd
 
-- name: Copy ssh host public key
-  copy: src={{ ssh_host_keys_dir }}/{{ inventory_hostname_short }}/ssh/{{ item }}.pub dest=/etc/ssh/{{ item }}.pub mode=0644 owner=root group=root
-  with_items:
-    - "{{ ssh_host_key_files }}"
+- name: Add HostCertificate line to sshd_config
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^HostCertificate" line="HostCertificate /etc/ssh/{{ ssh_host_key_cert }}"
   notify: restart sshd
 
-- name: Copy ssh host certificate
-  copy: src={{ ssh_host_keys_dir }}/{{ inventory_hostname_short }}/ssh/{{ item }}-cert.pub dest=/etc/ssh/{{ item }}-cert.pub mode=0644 owner=root group=root
-  with_items:
-    - "{{ ssh_host_key_files }}"
-  ignore_errors: True
-  notify: restart sshd
+- name: Get the ssh known_hosts with the host CA
+  uri: 
+    url="{{ ssh_hostca_url}}"
+    return_content=yes
+  register: known_hosts
 
-- name: Copy ssh_known_hosts
-  copy: src={{ ssh_host_keys_dir }}/ssh_known_hosts dest=/etc/ssh/ssh_known_hosts mode=0644 owner=root group=root
-  notify: restart sshd
+- name: Add the known_hosts entry with the host CA to known_hosts
+  lineinfile: dest=/etc/ssh/ssh_known_hosts regexp="^@cert-authority" line="{{ known_hosts.content }}"
+
+- name: Add Canonicalize options to ssh_config
+  blockinfile:
+    dest: /etc/ssh/ssh_config
+    block: |
+      CanonicalizeHostname yes
+      CanonicalizeFallbackLocal yes
+      CanonicalDomains "{{ ssh_canonicaldomains }}"

@@ -1,9 +1,9 @@
 ---
 # defaults file for ansible-role-sshd-host-keys-client
 
-ssh_host_keys_dir: "/share/ansible/nodes"
+ssh_host_key_cert: 'ssh_host_ed25519_key-cert.pub'
+ssh_host_key_pub: 'ssh_host_ed25519_key.pub'
 
-# Name of the private key files to copy (corresponding public key and
-# certificate are automatically copied)
-ssh_host_key_files:
-  - ssh_host_ed25519_key
+ssh_hostca_url: "http://{{ hostvars[groups['install'][0]]['ansible_hostname'] }}:8082"
+
+ssh_canonicaldomains: "{{ ansible_domain }}"
