@@ -1,33 +1,22 @@
 ansible-role-sshd-host-keys
 ===========================
 
-A simple role that just copies sshd host keys, certs and
-ssh_known_hosts from a specified location.
+A simple role that just contacts a ssh host CA providing the host
+public key, and gets back a signed certificate which is
+installed. Modifies sshd_config and ssh_config appropriate to work in
+a CA environment.
 
 Requirements
 ------------
 
 It's expected that you use another role such as
-https://github.com/CSC-IT-Center-for-Science/ansible-role-sshd-host-keys
-to generate the keys, and yet another role such as
-https://github.com/willshersystems/ansible-sshd to actually configure
-sshd.
+https://github.com/jabl/ansible-role-ssh-hostca-srv
+to setup the host CA signing service that this role depends on.
 
 Role Variables
 --------------
 
-ssh_host_keys_dir specifies the root of the directory where the keys
-are located. The keys are then in the subdirectory "{{
-inventory_hostname }}/ssh".
-
-The ssh_host_key_files variable specifies a list of private key names
-to copy. The name of the corresponding public key and certificate is
-automatically generated from that name.
-
-    ssh_host_keys_dir: Directory where to copy the host keys from.
-	ssh_host_key_files:
-	 - ssh_host_ed25519_key
-	   
+See defaults/main.yml
 
 Dependencies
 ------------
