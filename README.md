@@ -35,7 +35,7 @@ Including an example of how to use your role (for instance, with variables passe
 License
 -------
 
-GPLv3
+MPL 2.0
 
 Author Information
 ------------------
